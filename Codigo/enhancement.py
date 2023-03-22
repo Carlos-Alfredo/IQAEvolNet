@@ -2,6 +2,9 @@ import numpy as np
 from collections import OrderedDict
 import cv2
 import metric
+import os
+from scipy.fftpack import fft2, ifft2, fftshift
+from scipy.ndimage import gaussian_filter, median_filter, maximum_filter, minimum_filter
 
 def normalize(min_old, max_old, min_new, max_new, val):
 	'''Normalizes values to the interval [min_new, max_new]
@@ -136,9 +139,83 @@ def clahe(image):
 
 	return equalized_image
 
-image = cv2.imread("C:\\Users\\carlo\\Documents\\Mestrado\\Codigo\\x-ray-images-enhancement-master\\images\\002.jpg")
+def hef(img):
+	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-enh_img = clahe(image)
+	img = normalize(np.min(img), np.max(img), 0, 255, img)
+
+	# HF part
+	img_fft = fft2(img)  # img after fourier transformation
+	img_sfft = fftshift(img_fft)  # img after shifting component to the center
+	print(img_sfft.shape)
+	m, n = img_sfft.shape
+
+	filter_array = np.zeros((m, n))
+	d0v = 45
+	for i in range(m):
+		for j in range(n):
+			filter_array[i, j] = 1.0 - np.exp(- ((i-m / 2.0) ** 2 + (j-n / 2.0) ** 2) / (2 * (d0v ** 2)))
+	k1 = 0.5
+	k2 = 0.75
+	high_filter = k1 + k2*filter_array
+
+	img_filtered = high_filter * img_sfft
+	img_hef = np.real(ifft2(fftshift(img_filtered)))  # HFE filtering done
+	# HE part
+	# Building the histogram
+	hist, bins = histogram(img_hef)
+	# Calculating probability for each pixel
+	pixel_probability = hist / hist.sum()
+	# Calculating the CDF (Cumulative Distribution Function)
+	cdf = np.cumsum(pixel_probability)
+	cdf_normalized = cdf * 255
+	hist_eq = {}
+	for i in range(len(cdf)):
+		hist_eq[bins[i]] = int(cdf_normalized[i])
+
+	for i in range(m):
+		for j in range(n):
+			img[i][j] = hist_eq[img_hef[i][j]]
+
+	return img.astype(np.uint8)
+
+def unsharp_mask(img):
+
+	radius = 5
+	amount = 0.1
+	
+	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+	img = normalize(np.min(img), np.max(img), 0, 255, img)
+
+	img = img.astype("float")
+
+	filtro = "gaussiano"
+
+	if filtro == "gaussiano":
+		blurred_image = gaussian_filter(img, sigma = radius)
+	elif filtro == "mediana":
+		blurred_image = median_filter(img, size = 20)
+	elif filtro == "maximo":
+		blurred_image = maximum_filter(img, size = 20)
+	elif filtro == "minimo":
+		blurred_image = minimum_filter(img, size = 20)
+
+	mask = img - blurred_image # keep the edges created by the filter
+	sharpened_image = img + mask * amount
+	print(sharpened_image.dtype)
+	sharpened_image = np.clip(sharpened_image, float(0), float(1)) # Interval [0.0, 1.0]
+	sharpened_image = (sharpened_image*255).astype(np.uint8) # Interval [0,255]
+
+	return sharpened_image
+
+os.getcwd()
+
+image = cv2.imread(os.getcwd()+"\\x-ray-images-enhancement-master\\images\\001.jpg")
+
+#enh_img = clahe(image)
+#enh_img = hef(image)
+enh_img = unsharp_mask(image)
 
 mse = metric.MSE(image,enh_img)
 
@@ -166,6 +243,8 @@ print("\nRMSE = ",rmse)
 print("\nIEM = ",iem)
 
 print("\nAG = ",ag_original," || ",ag)
+
+cv2.imshow("original image",image)
 
 cv2.imshow("enhanced image",enh_img)
 
