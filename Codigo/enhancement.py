@@ -106,8 +106,8 @@ def clahe(image):
 
 	image = normalize(np.min(image), np.max(image), 0, 255, image)
 
-	window_size = 100
-	clip_limit = 150
+	window_size = 16
+	clip_limit = 2
 	n_iter = 1
 
 	border = window_size // 2
@@ -190,7 +190,7 @@ def unsharp_mask(img):
 
 	img = img.astype("float")
 
-	filtro = "gaussiano"
+	filtro = "minimo"
 
 	if filtro == "gaussiano":
 		blurred_image = gaussian_filter(img, sigma = radius)
@@ -215,11 +215,11 @@ def unsharp_mask(img):
 
 os.getcwd()
 
-image = cv2.imread(os.getcwd()+"\\x-ray-images-enhancement-master\\images\\001.jpg")
+image = cv2.imread(os.getcwd()+"\\x-ray-images-enhancement-master\\images\\002.jpg")
 
-#enh_img = clahe(image)
+enh_img = clahe(image)
 #enh_img = hef(image)
-enh_img = unsharp_mask(image)
+#enh_img = unsharp_mask(image)
 
 mse = metric.MSE(image,enh_img)
 
