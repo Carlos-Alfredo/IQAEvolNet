@@ -182,7 +182,7 @@ def hef(img):
 def unsharp_mask(img):
 
 	radius = 5
-	amount = 0.1
+	amount = 1
 	
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -204,8 +204,12 @@ def unsharp_mask(img):
 	mask = img - blurred_image # keep the edges created by the filter
 	sharpened_image = img + mask * amount
 	print(sharpened_image.dtype)
-	sharpened_image = np.clip(sharpened_image, float(0), float(1)) # Interval [0.0, 1.0]
+	#sharpened_image = np.clip(sharpened_image, float(0), float(1)) # Interval [0.0, 1.0]
+	sharpened_image = sharpened_image/sharpened_image.max()
 	sharpened_image = (sharpened_image*255).astype(np.uint8) # Interval [0,255]
+	cv2.imshow("original image",mask)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 
 	return sharpened_image
 
