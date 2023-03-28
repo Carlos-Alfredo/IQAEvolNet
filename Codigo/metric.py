@@ -30,7 +30,7 @@ def EME(img,rowSample,columnSample):
 		grayImg = img
 	else:
 		grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-	
+	#grayImg = cv2.resize(grayImg, (grayImg.shape[0]+rowSample-grayImg.shape[0]%rowSample,grayImg.shape[1]+rowSample-grayImg.shape[1]%rowSample), interpolation=cv2.INTER_AREA)
 	rowSize, columnSize = grayImg.shape
 	nRows = int(rowSize/rowSample)
 	nColumns = int(columnSize/columnSample)
@@ -61,8 +61,8 @@ def EME(img,rowSample,columnSample):
 			nBlocks = nBlocks + 1
 	if incompleteRow==1:
 		for j in range(0,nColumns):
-			imax=grayImg[grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample]].max()
-			imin=grayImg[grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample]].min()
+			imax=grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample].max()
+			imin=grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample].min()
 			if imin==0:
 				imin=1
 			if imax==0:
@@ -88,7 +88,7 @@ def EMEE(img,rowSample,columnSample):
 		grayImg = img
 	else:
 		grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+	#grayImg = cv2.resize(grayImg, (grayImg.shape[0]+rowSample-grayImg.shape[0]%rowSample,grayImg.shape[1]+rowSample-grayImg.shape[1]%rowSample), interpolation=cv2.INTER_AREA)
 	rowSize, columnSize = grayImg.shape
 	nRows = int(rowSize/rowSample)
 	nColumns = int(columnSize/columnSample)
@@ -119,8 +119,8 @@ def EMEE(img,rowSample,columnSample):
 			nBlocks = nBlocks + 1
 	if incompleteRow==1:
 		for j in range(0,nColumns):
-			imax=grayImg[grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample]].max()
-			imin=grayImg[grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample]].min()
+			imax=grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample].max()
+			imin=grayImg[nRows*rowSample:rowSize,j*columnSample:(j+1)*columnSample].min()
 			if imin==0:
 				imin=1
 			if imax==0:
