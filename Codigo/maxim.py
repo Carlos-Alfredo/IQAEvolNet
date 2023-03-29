@@ -95,9 +95,9 @@ def maxim_model():
     return new_model
 
 def teste_inicial():
-	image_path = "C:\\Users\\carlo\\Documents\\Mestrado\\Codigo\\x-ray-images-enhancement-master\\images\\001.jpg"
-
-	clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+	#image_path = "C:\\Users\\carlo\\Documents\\Mestrado\\Codigo\\x-ray-images-enhancement-master\\images\\001.jpg"
+	image_path = image_path = "C:\\Users\\lucas vitoriano\\Desktop\\Mestrado\\Codigo\\Ultrassom\\Origem\\MPX1005_synpic27455.png"
+	clahe = cv2.createCLAHE(clipLimit=1.0, tileGridSize=(50,50))
 
 	start = time.time()
 	model = maxim_model()
@@ -210,4 +210,4 @@ def teste_geral():
 	print(tabulate(tabela_maxim))
 	print(tabulate(tabela_clahe))
 
-teste_geral()
+teste_inicial()

@@ -91,7 +91,7 @@ def calculate_cdf(hist, bins):
 
 	return hist_eq
 
-def clahe(image):
+def clahe_manual(image):
 	'''Applies the CLAHE algorithm in an image.
 
 	Parameters:
@@ -137,9 +137,11 @@ def clahe(image):
 	return equalized_image
 
 image = cv2.imread("C:\\Users\\carlo\\Documents\\Mestrado\\Codigo\\x-ray-images-enhancement-master\\images\\002.jpg")
+image = cv2.imread("C:\\Users\\lucas vitoriano\\Desktop\\Mestrado\\Codigo\\Ultrassom\\Origem\\MPX1155_synpic51230.png",cv2.IMREAD_GRAYSCALE)
 
-enh_img = clahe(image)
-
+#enh_img = clahe_manual(image)
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+enh_img =clahe.apply(image)
 mse = metric.MSE(image,enh_img)
 
 eme_original = metric.EME(image,10,10)
@@ -166,6 +168,8 @@ print("\nRMSE = ",rmse)
 print("\nIEM = ",iem)
 
 print("\nAG = ",ag_original," || ",ag)
+
+cv2.imshow("original image",image)
 
 cv2.imshow("enhanced image",enh_img)
 
