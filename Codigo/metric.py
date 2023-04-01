@@ -1,7 +1,8 @@
 import numpy as np
 import cv2
 import math
-from skimage.measure import compare_ssim
+#from skimage.measure import compare_ssim
+from skimage.metrics import structural_similarity as ssim
 
 
 
@@ -238,5 +239,4 @@ def CNR(image_improved):
 	return cnr
 
 def SSIM(image_original,image_improved):
-	ssim = compare_ssim(image_original, image_improved)
-	return ssim
+	return ssim(image_original, image_improved)

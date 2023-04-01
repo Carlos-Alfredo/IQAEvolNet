@@ -18,50 +18,63 @@ def teste_inicial():
 	#image_path = image_path = "C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\Codigo\\Ultrassom\\Origem\\MPX1005_synpic27455.png"
 	#image_path = "C:\\Users\\carlo\\Documents\\GitHub\\ProjetoPecem\\Carlos-SVMClassifier\\dataset_pecem\\Ruim\\Imagem7.jpg"
 
-	start = time.time()
+	img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 	model = maxim_model()
-	end = time.time()
-	print("Tempo de carregamento do modelo = ",end-start)
-
 	start = time.time()
-	final_pred_image = infer(image_path,model)
+	#final_pred_image = infer(path[0],model)
+	maxim_img = cv2.cvtColor(infer(image_path,model), cv2.COLOR_BGR2GRAY)*255
 	end = time.time()
 	print("Tempo de execução Maxim =",end-start)
 
-	img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
 	start = time.time()
-	cl1 = CLAHE(img,2,8)
+	clahe_img = CLAHE(img,2,8)
 	end = time.time()
 	print("Tempo de execução CLAHE =",end-start)
 
-	cv2.imshow(input_image,"Input")
-	cv2.imshow(final_pred_image,"Maxim")
-	cv2.imshow(cl1,"CLAHE")
-	cv2.waitKey(0)
-	cv2.destroyallwindows()
+	start = time.time()
+	um_img = UM(img,1,0)
+	end = time.time()
+	print("Tempo de execução UM =",end-start)
 
+	start = time.time()
+	hef_image = HEF(img,70)
+	end = time.time()
+	print("Tempo de execução HEF =",end-start)
+
+	# start = time.time()
+	# model = maxim_model()
+	# end = time.time()
+	# print("Tempo de carregamento do modelo = ",end-start)
+
+	# start = time.time()
+	# final_pred_image = infer(image_path,model)
+	# end = time.time()
+	# print("Tempo de execução Maxim =",end-start)
+
+	# img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+	# start = time.time()
+	# cl1 = CLAHE(img,2,8)
+	# end = time.time()
+	# print("Tempo de execução CLAHE =",end-start)
 
 	plt.figure(figsize=(15, 15))
+	img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+	plt.subplot(2, 3, 1)
+	imshow(img, "Input Image")
 
-	plt.subplot(1, 3, 1)
-	input_image = np.asarray(Image.open(image_path).convert("RGB"), np.float32) / 255.0
+	plt.subplot(2, 3, 2)
+	#imshow(cv2.cvtColor(final_pred_image, cv2.COLOR_BGR2GRAY), "Predicted Image")
+	imshow(maxim_img, "Maxim Image")
 
-	cv2.imshow(input_image,"Input")
-	cv2.imshow(final_pred_image,"Maxim")
-	cv2.imshow(cl1,"CLAHE")
-	cv2.waitKey(0)
-	cv2.destroyallwindows()
-
+	plt.subplot(2, 3, 3)
+	imshow(clahe_img, "CLAHE Image")
 	
-	imshow(cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY), "Input Image")
+	plt.subplot(2, 3, 4)
+	imshow(um_img, "UM Image")
 
-	plt.subplot(1, 3, 2)
-	imshow(cv2.cvtColor(final_pred_image, cv2.COLOR_BGR2GRAY), "Predicted Image")
-
-	plt.subplot(1, 3, 3)
-	plt.imshow(cl1,cmap='gray')
-	plt.title("CLAHE Image")
+	plt.subplot(2, 3, 5)
+	imshow(hef_image, "HEF Image")
 
 	plt.show()
 
@@ -70,81 +83,145 @@ def teste_geral():
 	for root, dirs, files in os.walk("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\Codigo\\img_teste"):
 		for file in files:
 			image_path.append([os.path.join(root,file),file])
-	print(len(image_path))
+	tot = len(image_path)
+	curr = 0
 	maxim_time = []
 	clahe_time = []
+	um_time    = []
+	hef_time   = []
 	maxim_metrics = [[],[],[],[],[],[],[]]
 	clahe_metrics = [[],[],[],[],[],[],[]]
+	um_metrics    = [[],[],[],[],[],[],[]]
+	hef_metrics   = [[],[],[],[],[],[],[]]
 	model = maxim_model()
-	clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+	#clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
 	for path in image_path:
+		print(str(curr)+"/"+str(tot))
+		curr = curr + 1
 		start = time.time()
-		final_pred_image = infer(path[0],model)
-		final_pred_image = cv2.cvtColor(infer(path[0],model), cv2.COLOR_BGR2GRAY)*255
+		#final_pred_image = infer(path[0],model)
+		maxim_img = cv2.cvtColor(infer(path[0],model), cv2.COLOR_BGR2GRAY)*255
 		end = time.time()
 		maxim_time.append(end-start)
 
 		img = cv2.imread(path[0], cv2.IMREAD_GRAYSCALE)
 
 		start = time.time()
-		cl1 = clahe.apply(img)
+		clahe_img = CLAHE(img,2,8)
 		end = time.time()
 		clahe_time.append(end-start)
 
-		cv2.imwrite("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\\\Codigo\\img_resultado\\Clahe"+"\\"+path[1], cl1)
+		start = time.time()
+		um_img = UM(img,1,0)
+		end = time.time()
+		um_time.append(end-start)
 
-		cv2.imwrite("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\\\Codigo\\img_resultado\\Maxim"+"\\"+path[1], final_pred_image)
+		start = time.time()
+		hef_img = HEF(img,70)
+		end = time.time()
+		hef_time.append(end-start)
 
-		maxim_metrics[0].append(metric.MSE(img,final_pred_image))
+		img = cv2.imread(path[0], cv2.IMREAD_GRAYSCALE)
 
-		maxim_metrics[1].append(metric.EME(final_pred_image,10,10))
+		cv2.imwrite("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\\\Codigo\\img_resultado\\Maxim"+"\\"+path[1], maxim_img)
 
-		maxim_metrics[2].append(metric.EMEE(final_pred_image,10,10))
+		cv2.imwrite("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\\\Codigo\\img_resultado\\Clahe"+"\\"+path[1], clahe_img)
 
-		maxim_metrics[3].append(metric.RMSE(img,final_pred_image))
+		cv2.imwrite("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\\\Codigo\\img_resultado\\UM"+"\\"+path[1], um_img)
 
-		maxim_metrics[4].append(metric.IEM(img,final_pred_image))
+		cv2.imwrite("C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\\\Codigo\\img_resultado\\HEF"+"\\"+path[1], hef_img)
 
-		maxim_metrics[5].append(metric.AG(final_pred_image))
+		# Maxim Metrics
+		maxim_metrics[0].append(metric.MSE(img,maxim_img))
 
-		maxim_metrics[6].append(metric.SSIM(img,final_pred_image))
+		maxim_metrics[1].append(metric.EME(maxim_img,10,10))
 
-		clahe_metrics[0].append(metric.MSE(img,cl1))
+		maxim_metrics[2].append(metric.EMEE(maxim_img,10,10))
 
-		clahe_metrics[1].append(metric.EME(cl1,10,10))
+		maxim_metrics[3].append(metric.RMSE(img,maxim_img))
 
-		clahe_metrics[2].append(metric.EMEE(cl1,10,10))
+		maxim_metrics[4].append(metric.IEM(img,maxim_img))
 
-		clahe_metrics[3].append(metric.RMSE(img,cl1))
+		maxim_metrics[5].append(metric.AG(maxim_img))
 
-		clahe_metrics[4].append(metric.IEM(img,cl1))
+		maxim_metrics[6].append(metric.SSIM(img,maxim_img))
 
-		clahe_metrics[5].append(metric.AG(cl1))
+		# CLAHE Metrics
+		clahe_metrics[0].append(metric.MSE(img,clahe_img))
 
-		clahe_metrics[6].append(metric.SSIM(img,cl1))
+		clahe_metrics[1].append(metric.EME(clahe_img,10,10))
 
+		clahe_metrics[2].append(metric.EMEE(clahe_img,10,10))
 
+		clahe_metrics[3].append(metric.RMSE(img,clahe_img))
 
-	tabela_maxim=np.zeros((2,6))
-	tabela_clahe=np.zeros((2,6))
-	for i in range(0,6):
+		clahe_metrics[4].append(metric.IEM(img,clahe_img))
+
+		clahe_metrics[5].append(metric.AG(clahe_img))
+
+		clahe_metrics[6].append(metric.SSIM(img,clahe_img))
+
+		#UM Metrics
+		um_metrics[0].append(metric.MSE(img,um_img))
+
+		um_metrics[1].append(metric.EME(um_img,10,10))
+
+		um_metrics[2].append(metric.EMEE(um_img,10,10))
+
+		um_metrics[3].append(metric.RMSE(img,um_img))
+
+		um_metrics[4].append(metric.IEM(img,um_img))
+
+		um_metrics[5].append(metric.AG(um_img))
+
+		um_metrics[6].append(metric.SSIM(img,um_img))
+
+		#HEF Metrics
+		hef_metrics[0].append(metric.MSE(img,hef_img))
+
+		hef_metrics[1].append(metric.EME(hef_img,10,10))
+
+		hef_metrics[2].append(metric.EMEE(hef_img,10,10))
+
+		hef_metrics[3].append(metric.RMSE(img,hef_img))
+
+		hef_metrics[4].append(metric.IEM(img,hef_img))
+
+		hef_metrics[5].append(metric.AG(hef_img))
+
+		hef_metrics[6].append(metric.SSIM(img,hef_img))
+
+	tabela_maxim=np.zeros((2,7))
+	tabela_clahe=np.zeros((2,7))
+	tabela_um=np.zeros((2,7))
+	tabela_hef=np.zeros((2,7))
+	tabela_time=np.zeros((2,4))
+	for i in range(0,7):
 		tabela_maxim[0,i] = np.mean(maxim_metrics[i])
 		tabela_maxim[1,i] = np.std(maxim_metrics[i])
 
-	tabela_clahe=np.zeros((2,6))
-	for i in range(0,6):
 		tabela_clahe[0,i] = np.mean(clahe_metrics[i])
 		tabela_clahe[1,i] = np.std(clahe_metrics[i])
 
-	print("Maxim mean time = ", np.mean(maxim_time))
-	print("Maxim std time = ", np.std(maxim_time))
-	print("Clahe mean time = ", np.mean(clahe_time))
-	print("Clahe std time = ", np.std(clahe_time))
+		tabela_um[0,i] = np.mean(um_metrics[i])
+		tabela_um[1,i] = np.std(um_metrics[i])
+
+		tabela_hef[0,i] = np.mean(hef_metrics[i])
+		tabela_hef[1,i] = np.std(hef_metrics[i])
+	
+	tabela_time[0,0] = np.mean(maxim_time)
+	tabela_time[1,0] = np.std(maxim_time)
+	tabela_time[0,1] = np.mean(clahe_time)
+	tabela_time[1,1] = np.std(clahe_time)
+	tabela_time[0,2] = np.mean(um_time)
+	tabela_time[1,2] = np.std(um_time)
+	tabela_time[0,3] = np.mean(hef_time)
+	tabela_time[1,3] = np.std(hef_time)
 
 	np.savetxt("maxim_statistics.csv",tabela_maxim,delimiter=",")
 	np.savetxt("clahe_statistics.csv",tabela_clahe,delimiter=",")
-	
-	print(tabulate(tabela_maxim))
-	print(tabulate(tabela_clahe))
+	np.savetxt("um_statistics.csv",tabela_um,delimiter=",")
+	np.savetxt("hef_statistics.csv",tabela_hef,delimiter=",")
+	np.savetxt("time_statistics.csv",tabela_time,delimiter=",")
 
-teste_inicial()
+teste_geral()
