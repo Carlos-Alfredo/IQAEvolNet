@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import math
-
+from skimage.measure import compare_ssim
 
 
 
@@ -217,3 +217,26 @@ def AG(image_improved):
 
 	return averageGradient
 
+def CNR(image_improved):
+	# Convert the image to grayscale
+	gray = cv2.cvtColor(image_improved, cv2.COLOR_BGR2GRAY)
+
+	# Calculate the contrast
+	mean, std = cv2.meanStdDev(gray)
+	contrast = std/mean
+
+	# Create a noisy version of the image
+	noise = np.random.normal(0, 1, gray.shape)
+	noisy = cv2.add(gray, noise)
+
+	# Calculate the PSNR
+	mse = np.mean((gray - noisy) ** 2)
+	psnr = 10 * np.log10((255 ** 2) / mse)
+
+	cnr = contrast / psnr
+
+	return cnr
+
+def SSIM(image_original,image_improved):
+	ssim = compare_ssim(image_original, image_improved)
+	return ssim
