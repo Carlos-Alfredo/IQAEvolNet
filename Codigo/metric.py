@@ -219,19 +219,16 @@ def AG(image_improved):
 	return averageGradient
 
 def CNR(image_improved):
-	# Convert the image to grayscale
-	gray = cv2.cvtColor(image_improved, cv2.COLOR_BGR2GRAY)
-
 	# Calculate the contrast
-	mean, std = cv2.meanStdDev(gray)
+	mean, std = cv2.meanStdDev(image_improved)
 	contrast = std/mean
 
 	# Create a noisy version of the image
-	noise = np.random.normal(0, 1, gray.shape)
-	noisy = cv2.add(gray, noise)
+	noise = np.random.normal(0, 1, image_improved.shape)
+	noisy = (image_improved + noise).astype(int)
 
 	# Calculate the PSNR
-	mse = np.mean((gray - noisy) ** 2)
+	mse = np.mean((image_improved - noisy) ** 2)
 	psnr = 10 * np.log10((255 ** 2) / mse)
 
 	cnr = contrast / psnr

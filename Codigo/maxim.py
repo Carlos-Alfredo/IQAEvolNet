@@ -14,15 +14,15 @@ from tabulate import tabulate
 from enhancement_algorithms import UM, HEF,CLAHE, maxim_model, infer, imshow
 
 def teste_inicial():
-	image_path = "C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\Codigo\\x-ray-images-enhancement-master\\images\\001.jpg"
+	image_path = "C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\Codigo\\x-ray-images-enhancement-master\\images\\017.jpg"
 	#image_path = image_path = "C:\\Users\\carlo\\Documents\\GitHub\\Mestrado\\Codigo\\Ultrassom\\Origem\\MPX1005_synpic27455.png"
 	#image_path = "C:\\Users\\carlo\\Documents\\GitHub\\ProjetoPecem\\Carlos-SVMClassifier\\dataset_pecem\\Ruim\\Imagem7.jpg"
 
 	img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-	model = maxim_model()
+	# model = maxim_model()
 	start = time.time()
 	#final_pred_image = infer(path[0],model)
-	maxim_img = cv2.cvtColor(infer(image_path,model), cv2.COLOR_BGR2GRAY)*255
+	maxim_img = img # cv2.cvtColor(infer(image_path,model), cv2.COLOR_BGR2GRAY)*255
 	end = time.time()
 	print("Tempo de execução Maxim =",end-start)
 
@@ -37,7 +37,7 @@ def teste_inicial():
 	print("Tempo de execução UM =",end-start)
 
 	start = time.time()
-	hef_image = HEF(img,70)
+	hef_image = HEF(img,30)
 	end = time.time()
 	print("Tempo de execução HEF =",end-start)
 
@@ -89,10 +89,10 @@ def teste_geral():
 	clahe_time = []
 	um_time    = []
 	hef_time   = []
-	maxim_metrics = [[],[],[],[],[],[],[]]
-	clahe_metrics = [[],[],[],[],[],[],[]]
-	um_metrics    = [[],[],[],[],[],[],[]]
-	hef_metrics   = [[],[],[],[],[],[],[]]
+	maxim_metrics = [[],[],[],[],[],[],[],[]]
+	clahe_metrics = [[],[],[],[],[],[],[],[]]
+	um_metrics    = [[],[],[],[],[],[],[],[]]
+	hef_metrics   = [[],[],[],[],[],[],[],[]]
 	model = maxim_model()
 	#clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
 	for path in image_path:
@@ -112,7 +112,7 @@ def teste_geral():
 		clahe_time.append(end-start)
 
 		start = time.time()
-		um_img = UM(img,1,0)
+		um_img = UM(img,5,2)
 		end = time.time()
 		um_time.append(end-start)
 
@@ -146,6 +146,7 @@ def teste_geral():
 
 		maxim_metrics[6].append(metric.SSIM(img,maxim_img))
 
+		maxim_metrics[7].append(metric.CNR(maxim_img))
 		# CLAHE Metrics
 		clahe_metrics[0].append(metric.MSE(img,clahe_img))
 
@@ -161,6 +162,7 @@ def teste_geral():
 
 		clahe_metrics[6].append(metric.SSIM(img,clahe_img))
 
+		clahe_metrics[7].append(metric.CNR(clahe_img))
 		#UM Metrics
 		um_metrics[0].append(metric.MSE(img,um_img))
 
@@ -176,6 +178,7 @@ def teste_geral():
 
 		um_metrics[6].append(metric.SSIM(img,um_img))
 
+		um_metrics[7].append(metric.CNR(um_img))
 		#HEF Metrics
 		hef_metrics[0].append(metric.MSE(img,hef_img))
 
@@ -191,12 +194,14 @@ def teste_geral():
 
 		hef_metrics[6].append(metric.SSIM(img,hef_img))
 
-	tabela_maxim=np.zeros((2,7))
-	tabela_clahe=np.zeros((2,7))
-	tabela_um=np.zeros((2,7))
-	tabela_hef=np.zeros((2,7))
+		hef_metrics[7].append(metric.CNR(hef_img))
+
+	tabela_maxim=np.zeros((2,8))
+	tabela_clahe=np.zeros((2,8))
+	tabela_um=np.zeros((2,8))
+	tabela_hef=np.zeros((2,8))
 	tabela_time=np.zeros((2,4))
-	for i in range(0,7):
+	for i in range(0,8):
 		tabela_maxim[0,i] = np.mean(maxim_metrics[i])
 		tabela_maxim[1,i] = np.std(maxim_metrics[i])
 
