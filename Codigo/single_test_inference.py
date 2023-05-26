@@ -70,7 +70,7 @@ device3 = [	path+ "025.jpg", path+ "026.jpg",path+ "027.jpg",path+ "028.jpg",pat
 
 # print(evolution.aggregate_fitness_score(fitness_score_each_device,number_of_imgs_each_device))
 
-evolutionProcess = evolution.EvolutionaryProcess(weight,16,4,0.01,3,[device1,device2,device3])
+evolutionProcess = evolution.EvolutionaryProcess(weight,25,5,0.01,3,[device1,device2,device3])
 
 evolutionProcess.evolve()
 

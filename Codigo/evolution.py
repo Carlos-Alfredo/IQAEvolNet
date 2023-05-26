@@ -24,32 +24,66 @@ class EvolutionaryProcess:
 		for i in range(1,population_size):
 			self.population.append(self.mutation(starting_weight))
 
+	# def mutation(self,weight):
+	# 	dimensions = 	[weight['e_conv_layer8.weight'].size(dim=0),
+	# 					weight['e_conv_layer8.weight'].size(dim=1),
+	# 					weight['e_conv_layer8.weight'].size(dim=2),
+	# 					weight['e_conv_layer8.weight'].size(dim=3)]
+	# 	mutated_weight = copy.deepcopy(weight)
+
+	# 	for j in range(0,dimensions[1]):
+	# 		# At a rate of chance_of_mutation
+	# 		if(torch.rand(1)<self.chance_of_mutation):
+	# 			# Creates a random mutation tensor in the interval of [-1,1]
+	# 			mutation_tensor = torch.rand((dimensions[2],dimensions[3]),device='cuda:0') - torch.rand((dimensions[2],dimensions[3]),device='cuda:0')
+	# 			# Mutates the tensor on all color channels
+	# 			for i in range(0,dimensions[0]):
+	# 				mutated_weight['e_conv_layer8.weight'][i,j,:,:] = weight['e_conv_layer8.weight'][i,j,:,:]*mutation_tensor
+
+	# 	return mutated_weight
+
+	# parentA: weight
+	# parentB: weight
+	# chance of mutation: real number([0,1])
+	# return: A new weight(child)
+
+	# def crossing(self,parentA,parentB):
+	# 	dimensions = 	[parentA['e_conv_layer8.weight'].size(dim=0),
+	# 					parentA['e_conv_layer8.weight'].size(dim=1),
+	# 					parentA['e_conv_layer8.weight'].size(dim=2),
+	# 					parentA['e_conv_layer8.weight'].size(dim=3)]
+		
+	# 	child = copy.deepcopy(parentA)
+
+	# 	for i in range(0,dimensions[0]):
+	# 		for j in range(0,dimensions[1]):
+	# 			child['e_conv_layer8.weight'][i,j,:,:] = (parentA['e_conv_layer8.weight'][i,j,:,:] + parentB['e_conv_layer8.weight'][i,j,:,:])/2
+
+	# 	return self.mutation(child)
+
+
+
+	# parents: List of weights that will originate the next generation
+	# next_generation: List of weights representing the next generation
+
 	def mutation(self,weight):
-		dimensions = 	[weight['e_conv_layer8.weight'].size(dim=0),
-						weight['e_conv_layer8.weight'].size(dim=1),
-						weight['e_conv_layer8.weight'].size(dim=2),
-						weight['e_conv_layer8.weight'].size(dim=3)]
-		mutated_weight = copy.deepcopy(weight)
-		# For each 3x3 tensor
-		# for i in range(0,dimensions[0]):
-		# 	for j in range(0,dimensions[1]):
-		# 		# At a rate of chance_of_mutation
-		# 		if(torch.rand(1)<chance_of_mutation):
-		# 			# Creates a random mutation tensor in the interval of [-1,1]
-		# 			mutation_tensor = torch.rand((dimensions[2],dimensions[3]),device='cuda:0') - torch.rand((dimensions[2],dimensions[3]),device='cuda:0')
-		# 			# Mutates the tensor
-		# 			weight['e_conv_layer8.weight'][i,j,:,:] = weight['e_conv_layer8.weight'][i,j,:,:]*mutation_tensor
+		for layer in weight.keys():
+			dimensions = 	[weight[layer].size(dim=0),
+							weight[layer].size(dim=1),
+							weight[layer].size(dim=2),
+							weight[layer].size(dim=3)]
+			mutated_weight = copy.deepcopy(weight)
 
-		for j in range(0,dimensions[1]):
-			# At a rate of chance_of_mutation
-			if(torch.rand(1)<self.chance_of_mutation):
-				# Creates a random mutation tensor in the interval of [-1,1]
-				mutation_tensor = torch.rand((dimensions[2],dimensions[3]),device='cuda:0') - torch.rand((dimensions[2],dimensions[3]),device='cuda:0')
-				# Mutates the tensor on all color channels
-				for i in range(0,dimensions[0]):
-					mutated_weight['e_conv_layer8.weight'][i,j,:,:] = weight['e_conv_layer8.weight'][i,j,:,:]*mutation_tensor
+			for j in range(0,dimensions[1]):
+				# At a rate of chance_of_mutation
+				if(torch.rand(1)<self.chance_of_mutation):
+					# Creates a random mutation tensor in the interval of [-1,1]
+					mutation_tensor = torch.rand((dimensions[2],dimensions[3]),device='cuda:0') - torch.rand((dimensions[2],dimensions[3]),device='cuda:0')
+					# Mutates the tensor on all color channels
+					for i in range(0,dimensions[0]):
+						mutated_weight[layer][i,j,:,:] = weight[layer][i,j,:,:]*mutation_tensor
 
-		return mutated_weight
+			return mutated_weight
 
 	# parentA: weight
 	# parentB: weight
@@ -57,21 +91,19 @@ class EvolutionaryProcess:
 	# return: A new weight(child)
 
 	def crossing(self,parentA,parentB):
-		dimensions = 	[parentA['e_conv_layer8.weight'].size(dim=0),
-						parentA['e_conv_layer8.weight'].size(dim=1),
-						parentA['e_conv_layer8.weight'].size(dim=2),
-						parentA['e_conv_layer8.weight'].size(dim=3)]
-		
-		child = copy.deepcopy(parentA)
+		for layer in weight.keys():
+			dimensions = 	[parentA[layer].size(dim=0),
+							parentA[layer].size(dim=1),
+							parentA[layer].size(dim=2),
+							parentA[layer].size(dim=3)]
+			
+			child = copy.deepcopy(parentA)
 
-		for i in range(0,dimensions[0]):
-			for j in range(0,dimensions[1]):
-				child['e_conv_layer8.weight'][i,j,:,:] = (parentA['e_conv_layer8.weight'][i,j,:,:] + parentB['e_conv_layer8.weight'][i,j,:,:])/2
+			for i in range(0,dimensions[0]):
+				for j in range(0,dimensions[1]):
+					child[layer][i,j,:,:] = (parentA[layer][i,j,:,:] + parentB[layer][i,j,:,:])/2
 
-		return self.mutation(child)
-
-	# parents: List of weights that will originate the next generation
-	# next_generation: List of weights representing the next generation
+			return self.mutation(child)
 
 	def next_generation(self,parents):
 		next_generation = []
