@@ -74,10 +74,10 @@ evolutionProcess = evolution.EvolutionaryProcess(weight,25,5,0.01,3,[device1,dev
 
 evolutionProcess.evolve()
 
-optimized_weight = evolutionProcess.return_apex()
+# optimized_weight = evolutionProcess.return_apex()
 
-print("Original model: ")
-print(dehaze_test(device1+device2+device3 , weight))
+# print("Original model: ")
+# print(dehaze_test(device1+device2+device3 , weight))
 
-print("\nOptimized model: ")
-print(dehaze_test(device1+device2+device3 , optimized_weight))
+# print("\nOptimized model: ")
+# print(dehaze_test(device1+device2+device3 , optimized_weight))
