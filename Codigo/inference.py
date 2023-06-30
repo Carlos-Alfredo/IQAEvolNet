@@ -35,3 +35,15 @@ def image_haze_removel(input_image,weight):
 	# print(torch.randn_like((ld_net.state_dict()['e_conv_layer8.weight'])[2,35,:,:])*0.1 + 1)
 	dehaze_image = ld_net(hazy_image)
 	return dehaze_image
+
+def image_haze_removal(input_image,ld_net):
+
+	hazy_image = (np.asarray(input_image)/255.0)
+
+	hazy_image = torch.from_numpy(hazy_image).float()
+	hazy_image = hazy_image.permute(2,0,1)
+	hazy_image = hazy_image.cuda().unsqueeze(0)
+
+	dehaze_image = ld_net(hazy_image)
+	
+	return dehaze_image

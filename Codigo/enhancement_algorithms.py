@@ -1,13 +1,13 @@
 import cv2
 import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift
-from huggingface_hub import from_pretrained_keras
-from transformers import AutoModel
+# from huggingface_hub import from_pretrained_keras
+# from transformers import AutoModel
 from PIL import Image
-import tensorflow as tf
-from tabulate import tabulate
+# import tensorflow as tf
+# from tabulate import tabulate
 import matplotlib.pyplot as plt
-from collections import OrderedDict
+# from collections import OrderedDict
 
 def normalize(min_old, max_old, min_new, max_new, val):
 	'''Normalizes values to the interval [min_new, max_new]

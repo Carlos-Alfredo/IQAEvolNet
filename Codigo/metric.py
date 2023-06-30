@@ -3,6 +3,7 @@ import cv2
 import math
 #from skimage.measure import compare_ssim
 from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
 
 
 
@@ -240,17 +241,15 @@ def CNR_IMPROVEMENT(image_original,image_improved):
 	return CNR(image_improved)/CNR(image_original)
 
 def SSIM(image_original,image_improved):
-	image_original = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
-	image_improved = cv2.cvtColor(image_improved, cv2.COLOR_BGR2GRAY)
+	if(len(image_original.shape)==3 and image_original.shape[2]!=1):
+		image_original = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+	if(len(image_improved.shape)==3 and image_improved.shape[2]!=1):
+		image_improved = cv2.cvtColor(image_improved, cv2.COLOR_BGR2GRAY)
 	return ssim(image_original, image_improved)
 
-def PSNR(img1, img2):
-    mse = 0
-    for i in range(img1.size[0]):
-        for j in range(img1.size[1]):
-            pixel1 = img1.getpixel((i,j))
-            pixel2 = img2.getpixel((i,j))
-            mse += (pixel1[0] - pixel2[0])**2 + (pixel1[1] - pixel2[1])**2 + (pixel1[2] - pixel2[2])**2
-    mse /= (img1.size[0] * img1.size[1] * 3)
-    psnr = 20 * math.log10(255 / math.sqrt(mse))
-    return psnr
+def PSNR(image_original, image_improved):
+	if(len(image_original.shape)==3 and image_original.shape[2]!=1):
+		image_original = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+	if(len(image_improved.shape)==3 and image_improved.shape[2]!=1):
+		image_improved = cv2.cvtColor(image_improved, cv2.COLOR_BGR2GRAY)
+	return psnr(image_original,image_improved)
