@@ -3,6 +3,7 @@ import torch
 from PIL import Image
 import numpy as np
 from torchvision.transforms import ToPILImage
+from ssim import PSNR,SSIM
 
 def list_split(original_list,number_of_splits):
 	sub_list = []
@@ -36,11 +37,9 @@ def metric_calculation(image_pair_list):
 
 	# fitness_measure.append([metric.EME(np.array(pil_image),10,10)/metric.EME(np.array(pil_original),10,10),metric.SSIM(np.array(pil_original),np.array(pil_image))])
 	fitness_measure_list = []
-	print(type(image_pair_list))
 	for image_pair in image_pair_list:
-		enhanced_image = image_pair[0]
-		original_image = image_pair[1]
-		print(np.array(original_image).shape)
-		fitness_measure = [metric.PSNR(np.array(original_image),np.array(enhanced_image)),metric.SSIM(np.array(original_image),np.array(enhanced_image))]
+		enhanced_image = np.array(image_pair[0])
+		original_image = np.array(image_pair[1])
+		fitness_measure = [PSNR(original_image,enhanced_image),SSIM(original_image,enhanced_image)]
 		fitness_measure_list.append(fitness_measure)
 	return fitness_measure_list

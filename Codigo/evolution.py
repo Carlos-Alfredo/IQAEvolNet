@@ -37,12 +37,14 @@ class EvolutionaryProcess:
 		mutated_weight = weight
 
 		for j in range(0,dimensions[1]):
-			# At a rate of chance_of_mutation
-			if(torch.rand(1)<self.chance_of_mutation):
+			# At a rate of chance_of_mutation * (1+rounds_without_improvement)
+			if(torch.rand(1)<self.chance_of_mutation*(1+self.rounds_without_improvement)):
 				# Creates a random mutation tensor in the interval of [-1,1]
-				mutation_tensor = torch.rand((dimensions[2],dimensions[3]),device='cuda') - torch.rand((dimensions[2],dimensions[3]),device='cuda')
-				if torch.rand(1)<0.5:
-					mutation_tensor = mutation_tensor.pow_(-1)
+				# mutation_tensor = torch.rand((dimensions[2],dimensions[3]),device='cuda') - torch.rand((dimensions[2],dimensions[3]),device='cuda')
+				# if torch.rand(1)<0.5:
+					# mutation_tensor = mutation_tensor.pow_(-1)
+				# Creates a mutation sensor from a normal distribution
+				mutation_tensor = torch.normal(mean=0,std=self.rounds_without_improvement,size=(dimensions[2],dimensions[3]),device='cuda') + torch.ones((dimensions[2],dimensions[3]),dtype=torch.float64,device='cuda')
 				# Mutates the tensor on all color channels
 				for i in range(0,dimensions[0]):
 					mutated_weight[i,j,:,:] = weight[i,j,:,:]*mutation_tensor
@@ -127,26 +129,23 @@ class EvolutionaryProcess:
 	# img_path_list: list with the paths of the images that will be used for the test
 	# returns: an array with the partial fitness score of each device ( population x number of metrics )
 
-	def fitness_test(self):
+	def fitness_test(self,multiprocess_number):
 		# cuda_device = torch.cuda.current_device()
 		# torch.cuda.set_device(cuda_device)
 		fitness_score = []
 		max_eme = 0
 		max_ssim = 0
 		ld_net = lightdehazeNet.LightDehaze_Net().cuda()
-		ld_net.load_state_dict(self.starting_weight)
+		# ld_net.load_state_dict(self.starting_weight)
 		for i in range(0,len(self.population)):
-			weight = dict({'e_conv_layer8.weight':self.population[i]})
+			# weight = dict({'e_conv_layer8.weight':self.population[i]})
+			weight = self.starting_weight
+			weight['e_conv_layer8.weight'] = self.population[i]
 			# fitness_measure = []
 			enhanced_imgs = []
-			ld_net.load_state_dict(weight,strict=False)
+			ld_net.load_state_dict(weight,strict=True)
 			for img in self.images:
-				img_tensor = img
-				img_tensor = (np.asarray(img_tensor)/255.0)
-				img_tensor = torch.from_numpy(img_tensor).float()
-				img_tensor = img_tensor.permute(2,0,1)
-				img_tensor = img_tensor.cuda().unsqueeze(0)
-				dehaze_image_tensor = ld_net(img_tensor)
+				dehaze_image_tensor = image_haze_removal(img,ld_net)
 				dehaze_image_pil = dehaze_image_tensor
 				dehaze_image_pil = dehaze_image_pil.cpu()
 				dehaze_image_pil = dehaze_image_pil.squeeze(0)
@@ -156,20 +155,23 @@ class EvolutionaryProcess:
 			arguments = []
 			for i in zip(enhanced_imgs,self.images):
 				arguments.append(list(i))
-			argument_splited = list_split(arguments,4)
-			print(argument_splited)
-			print(type(argument_splited))
-			pool = mp.Pool(processes=4)
+			argument_splited = list_split(arguments,multiprocess_number)
+			args = []
+			for i in range(0,multiprocess_number):
+				args.append((argument_splited[i],))
+			pool = mp.Pool(processes=multiprocess_number)
 			start = time.time()
 			results = pool.map(metric_calculation, argument_splited)
 			pool.close()
 			pool.join()
 			end = time.time()
-			print("Metric calculation time: ",end-start)
-			fitness_measure = np.reshape(np.asarray(results),-1)
-
+			# print("Metric calculation time: ",end-start)
+			fitness_measure = []
+			print(results)
+			for i in results:
+				fitness_measure += i
+			fitness_measure = np.asarray(fitness_measure)
 			fitness_measure_avg = np.mean(fitness_measure,axis=0)
-
 			fitness_score.append(fitness_measure_avg)
 		return np.asarray(fitness_score)
 
@@ -178,17 +180,17 @@ class EvolutionaryProcess:
 	# returns: numpy vector( population_size ) with the fitness score total of each individual
 	def aggregate_fitness_score(self,fitness_score__total):
 		fitness_score_normalized = fitness_score__total/np.max(fitness_score__total,axis=0)
+		fitness_score_aggregated = fitness_score_normalized[:,0]*fitness_score_normalized[:,1]
+		return fitness_score_aggregated
 
-		fitness_score_total = fitness_score_normalized[:,0]*fitness_score_normalized[:,1]
-		return fitness_score_total
-
-	def evolve(self):
+	def evolve(self,multiprocess_number):
 		args_list = []  # List of arguments for the task function
 		if self.round_count >20:
 			return 1
 		print("-> Round ",self.round_count)
 		self.round_count += 1
-		fitness_score=self.fitness_test()
+		fitness_score=self.fitness_test(multiprocess_number)
+		print(fitness_score)
 		fitness_score_total = self.aggregate_fitness_score(fitness_score)
 		population_ranking = np.argsort(fitness_score_total)[::-1]
 		# equal = all(torch.allclose(self.apex[key], self.population[population_ranking[0]][key]) for key in self.apex.keys())
