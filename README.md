@@ -1,5 +1,7 @@
 This repository contains the code used in the Article: IQAEvolNet: A Novel Unsupervised Evolutionary Image Enhancement Algorithm on Chest X-Ray Scans.
 
+Link for the article: https://link.springer.com/article/10.1007/s42600-024-00366-3
+
 The IQAEvolNet code is written on Imports/IQAEvolNet.py file. The application is showcased in the notebooks contained in the repository.
 
 There are 3 notebooks to be accessed:
